@@ -1,0 +1,32 @@
+//## General
+html {
+	line-height: 1.5;
+	font-family: $primaryFont;
+}
+
+body {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	color: $textColor;
+
+	// @include selection {
+	// 	background: rgba($primaryColor, .65);
+	// 	color: $white;
+	// }
+}
+
+h1, h2, h3, h4, h5, h6, hgroup,
+ul, ol, dd,
+p, a, figure,
+pre,table,fieldset,hr, address{
+    margin-bottom: $globalBaseMargin;
+}
+
+//## Paragraphs
+p, a, ul, ol {
+	@include font-size($p-font-sizes);
+}
+
+a {
+	text-decoration: none;
+}

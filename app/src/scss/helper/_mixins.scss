@@ -1,0 +1,190 @@
+// Clearfix
+@mixin clearfix() {
+  *zoom: 1;
+  &:before, &:after {
+    content: '';
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+//Triangle
+@mixin triangle($direction, $size: 0.375rem, $color: #222){
+  content: '';
+  display: block;
+  position: absolute;
+  height: 0; width: 0;
+  @if ($direction == 'up'){
+    border-bottom: $size solid $color;
+    border-left: $size solid transparent;
+    border-right: $size solid transparent;
+  }
+  @else if ($direction == 'down'){
+    border-top: $size solid $color;
+    border-left: $size solid transparent;
+    border-right: $size solid transparent;
+  }
+  @else if ($direction == 'left'){
+    border-top: $size solid transparent;
+    border-bottom: $size solid transparent;
+    border-right: $size solid $color;
+  }
+  @else if ($direction == 'right'){
+    border-top: $size solid transparent;
+    border-bottom: $size solid transparent;
+    border-left: $size solid $color;
+  }
+}
+
+// Z-Index
+@function z($name) {
+    @if index($z-indexes, $name) {
+        @return (length($z-indexes) - index($z-indexes, $name)) + 1;
+    } @else {
+        @warn 'There is no item "#{$name}" in this list; choose one of: #{$z-indexes}';
+        @return null;
+    }
+}
+
+// Media Queries
+@mixin breakpoint($width, $type: min) {
+    @if map_has_key($breakpoints, $width) {
+        $width: map_get($breakpoints, $width);
+        @if $type == max {
+            $width: $width - 1px;
+        }
+        @media only screen and (#{$type}-width: $width) {
+            @content;
+        }
+    }
+}
+
+// Responsive typography
+@mixin font-size($fs-map, $fs-breakpoints: $breakpoints) {
+  @each $fs-breakpoint, $fs-font-size in $fs-map {
+    @if $fs-breakpoint == null {
+      @include make-font-size($fs-font-size);
+    }
+    @else {
+      // If $fs-font-size is a key that exists in
+      // $fs-breakpoints, use the value
+      @if map-has-key($fs-breakpoints, $fs-breakpoint) {
+        $fs-breakpoint: map-get($fs-breakpoints, $fs-breakpoint);
+      }
+      @media screen and (min-width: $fs-breakpoint) {
+        @include make-font-size($fs-font-size);
+      }
+    }
+  }
+}
+
+//## Utility function for mixin font-size
+@mixin make-font-size($fs-font-size) {
+  // If $fs-font-size is a list, include
+  // both font-size and line-height
+  @if type-of($fs-font-size) == "list" {
+    font-size: nth($fs-font-size, 1);
+    @if (length($fs-font-size) > 1) {
+      line-height: nth($fs-font-size, 2);
+    }
+  }
+  @else {
+    font-size: $fs-font-size;
+  }
+}
+
+//## Standard Pseudo Element
+@mixin pseudo-el {
+  display: block;
+  content: "";
+}
+
+//## Pin to edges
+@mixin pin-to-edges($offset: 0) {
+  position: absolute;
+  top: $offset;
+  right: $offset;
+  bottom: $offset;
+  left: $offset;
+}
+
+//## Anchor Reset
+@mixin anchor-reset{
+  border: none;
+  line-height: 1;
+  margin: 0;
+  display: block;
+  background: none;
+}
+
+//## Aspect Ratio
+@mixin aspect-ratio($width, $height) {
+  position: relative;
+
+  &:before {
+    content: "";
+    display: block;
+    width: 100%;
+    padding-top: ($height/$width) * 100%;
+  }
+}
+
+//## Drop Caps
+@mixin dropcap-size($font-size, $drop-cap-height: 3, $line-height: 1.4) {
+
+  @if type-of($font-size) == "list" {
+    $font-size: nth($font-size, 1);
+
+    @if (length($font-size) > 1) {
+      $line-height: nth($font-size, 2);
+    }
+  }
+
+  //@debug $line-height;
+
+  font-size: floor(($font-size * $line-height)) * $drop-cap-height * 1.20;
+  line-height: floor(($font-size * $line-height)) *  $drop-cap-height;
+}
+
+@mixin dropcaps($font-family: $secondaryFont) {
+  float: left;
+  padding: 0 rem(8) 0 0;
+  font-family: $font-family;
+  @include dropcap-size(map-get($p-font-sizes, null), 2);
+
+  @include breakpoint(small) {
+    @include dropcap-size(map-get($p-font-sizes, small), 2);
+  }
+
+  @include breakpoint(medium) {
+    padding: 0 rem(15) 0 0;
+    @include dropcap-size(map-get($p-font-sizes, medium), 3.2);
+  }
+
+  @include breakpoint(large) {
+    @include dropcap-size(map-get($p-font-sizes, large));
+    @include dropcap-size(map-get($p-font-sizes, medium), 3.6);
+  }
+}
+
+@function strip-units($value) {
+  @return ($value / ($value * 0 + 1));
+}
+
+// Convert pixels to rems
+// eg. for a relational value of 12px write rem(12)
+// Assumes $em-base is the font-size of <html>
+
+@function rem($pxval) {
+  @if not unitless($pxval) {
+    $pxval: strip-units($pxval);
+  }
+
+  $base: $em-base;
+  @if not unitless($base) {
+    $base: strip-units($base);
+  }
+  @return ($pxval / $base) * 1rem;
+}

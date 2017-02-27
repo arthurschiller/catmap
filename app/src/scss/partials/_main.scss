@@ -1,0 +1,40 @@
+$em-base: 16px !default;
+
+*, *:before, *:after {
+	box-sizing: border-box;
+	-webkit-tap-highlight-color: rgba(#000, 0);
+}
+
+html, body {
+	height: 100%;
+}
+
+body {
+	overflow: hidden;
+	-webkit-font-smoothing: antialiased;
+}
+
+.wrapper, .container {
+	height: 100%;
+}
+
+.wrapper {
+	position: relative;
+	z-index: z("wrapper");
+}
+
+.container {
+	display: flex;
+	flex-flow: column wrap;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	//background: url(/src/images/dummy-map.png) center center no-repeat;
+	background-size: cover;
+	position: relative;
+}
+
+.header, .footer {
+	width: 100%;
+	z-index: z("bar");
+}

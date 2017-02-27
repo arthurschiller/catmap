@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="50px" height="60px" viewBox="0 0 50 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>home-pin</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="home-pin">
+            <path d="M25,60 C32.34375,60 50,38.8071187 50,25 C50,11.1928813 38.8071187,0 25,0 C11.1928813,0 0,11.1928813 0,25 C0,38.8071187 17.65625,60 25,60 Z" id="Oval-Copy-2" fill="#373D40"></path>
+            <path d="M22,33.484375 L22,42 L15,42 L15,26.616264 L25,15.5051529 L35,26.616264 L35,42 L28,42 L28,33.484375 L22,33.484375 Z M38.2689447,26.6823183 L25,12.4655918 L11.7310553,26.6823183 L10.2689447,25.3176817 L25,9.53440825 L39.7310553,25.3176817 L38.2689447,26.6823183 Z" id="Combined-Shape" fill="#FFFFFF" fill-rule="nonzero"></path>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,7 @@
+$fontFileFormats: woff woff2;
+
+@include font-face($primaryFontNameString, "../../src/fonts/qanelassoft/qanelassoft-regular", $file-formats: $fontFileFormats);
+@include font-face($primaryFontNameString, "../../src/fonts/qanelassoft/qanelassoft-regularitalic", normal, italic, $file-formats: $fontFileFormats);
+@include font-face($primaryFontNameString, "../../src/fonts/qanelassoft/qanelassoft-medium", 700, $file-formats: $fontFileFormats);
+@include font-face($primaryFontNameString, "../../src/fonts/qanelassoft/qanelassoft-mediumitalic", 700, italic, $file-formats: $fontFileFormats);
+@include font-face($primaryFontNameString, "../../src/fonts/qanelassoft/qanelassoft-bold", bold, $file-formats: $fontFileFormats);
