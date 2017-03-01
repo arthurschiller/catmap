@@ -1,253 +1,191 @@
 import $ from "jquery";
 
-var darkGray = "#373D40",
-	primaryColor = "#D8597F",
-	secondaryColor = "#7D64FF"
+// var datasources = require("./datasources.js");
+var mapHelper = require("./mapFunctions.js");
+var userInteractions = require("./uiInteractions.js");
 
-var logCount = 0
+document.addEventListener("DOMContentLoaded", function(event) {
 
-var map = null
-var routeLine = null
-var homeCoordinates = [13.651298, 52.376738]
+	var initialCat = null
+	var selectedCatString = null
 
-var catMarker = null
+	// cats
+	var coco = require("./coco.js")
+	var mio = require("./mio.js")
 
-var routeDataSource = null
+	// ## datasets
+	let cocoDataSet = {
+		zoom: 18,
+		trackingData: "logs/cocoLog.geojson",
+		date: "13.02.2017",
+		startTime: "22:17",
+		endTime: "07:27",
+		speed: 0.3,
+		radius: 0.10125,
+		distance: 3.2,
+		temperature: -1,
+		weatherCondition: "Cloudy"
+	}
 
-var slider = null
+	let mioDataSet = {
+		zoom: 19,
+		trackingData: "logs/mioLog_2.geojson",
+		date: "21.02.2017",
+		startTime: "22:52",
+		endTime: "06:12",
+		speed: 0.1,
+		radius: 0.0475,
+		distance: 1.3,
+		temperature: 2,
+		weatherCondition: "Cloudy"
+	}
 
-var createGeoJSONCircle = function(center, radiusInKm, points) {
-    
-    if(!points) points = 64
+	coco.data = cocoDataSet
+	mio.data = mioDataSet
 
-    var coords = {
-        latitude: center[1],
-        longitude: center[0]
-    };
+	console.log(mio.data.trackingData)
 
-    var km = radiusInKm;
+	// ## general stuff related to the map and visual appearance
+	var homeCoordinates = [13.651155, 52.37671]
 
-    var ret = [];
-    var distanceX = km/(111.320*Math.cos(coords.latitude*Math.PI/180));
-    var distanceY = km/110.574;
+	var slider = document.getElementById('time-slider'),
+	map = null,
+	mapSources = null,
+	mapLayers = null,
+	catMarker = null
 
-    var theta, x, y;
-    for(var i=0; i<points; i++) {
-        theta = (i/points)*(2*Math.PI);
-        x = distanceX*Math.cos(theta);
-        y = distanceY*Math.sin(theta);
+	userInteractions.handleOverlayToggling()
 
-        ret.push([coords.longitude+x, coords.latitude+y]);
-    }
-    ret.push(ret[0]);
+	// ## setup map
+	mapboxgl.accessToken = 'pk.eyJ1IjoiYXJ0aHVyc2NoaWxsZXIiLCJhIjoiY2l4cm1iamZxMDAzeDJxcmJhdG5sNGRkbCJ9.o1r2qoVtyIgFco7r5ErM2A'
 
-    return {
-        "type": "geojson",
-        "data": {
-            "type": "FeatureCollection",
-            "features": [{
-                "type": "Feature",
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [ret]
-                }
-            }]
-        }
-    };
+	map = new mapboxgl.Map({
+		container: 'map',
+		style: 'mapbox://styles/arthurschiller/ciyu45zq6004v2rqmorg8phtj',//'mapbox://styles/mapbox/light-v9',
+		center: homeCoordinates,
+		minZoom: 13.5,
+		zoom: 13.5,
+		pitch: 50,
+	});
+
+	configure(map, homeCoordinates)
+
+	setInitialCat(coco, function() {
+		visualizeDataOn(map, slider, initialCat)
+		setSliderIndicatorPosition()
+	})
+
+	$("#initial-overlay .cat-picker li").click(function() {
+
+		$("body").removeClass("initial-overlay-open")
+	})
+
+	map.on('load', function() {
+
+		console.log("Map finished loading.")
+		$("body").addClass("finished-loading")
+
+		// ## user interaction
+		$("[data-cat-identifier]").click(function() {
+
+			let catId = this.dataset.catIdentifier
+			console.log(catId)
+
+			if (catId == selectedCatString) {
+				console.log("already selected")
+				return
+			}
+
+			selectedCatString = catId
+
+			$("[data-cat-identifier]").each(function() {
+				$(this).removeClass("selected-cat")
+			})
+
+			$(this).addClass("selected-cat")
+			
+			switch (catId) {
+				
+				case "mio":
+					console.log("switch to mio")
+					mapHelper.switchData(map, slider, mio)
+					userInteractions.switchUIFor(mio)
+					break
+
+				case "coco":
+					console.log("switch to coco")
+					mapHelper.switchData(map, slider, coco)
+					userInteractions.switchUIFor(coco)
+					break
+			}
+
+			$('#time-slider')[0].value = 0
+			setSliderIndicatorPosition()
+		})
+
+		// setTimeout(function(){
+
+		// 	mapHelper.switchData(map, slider, mio)
+
+		// }, 2000);
+	})
+
+	function setInitialCat(cat, completion) {
+		
+		initialCat = cat
+		selectedCatString = initialCat.name.toLowerCase()
+		userInteractions.switchUIFor(cat)
+		completion()
+	}
+
+	let someValue = 1.12356
+	let otherValue = 1.123378
+
+	console.log(String(someValue).substring(0, 5))
+})
+
+// ## functions
+function configure(map, homeCoordinates) {
+
+	map.on('load', function() {
+
+		mapHelper.extrudeBuildings(map)
+	})
 }
 
+function visualizeDataOn(map, slider, cat) {
+
+	map.on('load', function() {
+
+		mapHelper.displayInitialData(map, slider, cat)
+	})
+}
+
+function setSliderIndicatorPosition() {
+
+	let slider = $('#time-slider')[0],
+	timeIndicator = $("#time-indicator"),
+	offset = 17,
+	trackWidth = $(slider).width() - offset * 2,
+	value = slider.value,
+	maxValue = slider.max
+
+	let percentage = value / maxValue
+	let computedPosition = -offset + (trackWidth * percentage)
+
+	console.log(maxValue)
+
+	$(timeIndicator).css("left", + computedPosition + "px")
+}
+
+window.onresize = function(event) {
+	setSliderIndicatorPosition()
+};
+
 export default {
+	
 	name: 'Map',
 	data() {
 		return {}
 	},
-}
-
-document.addEventListener("DOMContentLoaded", function(event) { 
-
-	$("#info-overlay_toggle").click(function(){
-		$(".info-overlay").toggleClass("info-overlay--visible")
-	})
-
-
-	slider = document.getElementById('time-slider')
-
-	mapboxgl.accessToken = 'pk.eyJ1IjoiYXJ0aHVyc2NoaWxsZXIiLCJhIjoiY2l4cm1iamZxMDAzeDJxcmJhdG5sNGRkbCJ9.o1r2qoVtyIgFco7r5ErM2A';
-	// This adds the map to your page
-	map = new mapboxgl.Map({
-	  // container id specified in the HTML
-	  container: 'map',
-	  // style URL
-	  style: 'mapbox://styles/arthurschiller/ciyu45zq6004v2rqmorg8phtj',//'mapbox://styles/mapbox/light-v9',
-	  // // initial position in [long, lat] format
-	  center: homeCoordinates,
-	  // // initial zoom
-	  minZoom: 13.5,
-	  zoom: 14,
-	  pitch: 50,
-	});
-
-	addOverlay()
-})
-
-function measureDistance(data) {
-
-	var linestring = {
-	    "type": "Feature",
-	    "geometry": {
-	        "type": "LineString",
-	        "coordinates": []
-	    }
-	}
-
-	var coordinates = data.features[0].geometry.coordinates
-	//console.log(coordinates)
-}
-
-function getLogCount(data) {
-
-	var times = data.features[0].properties.coordTimes
-
-	logCount = times.length
-	//console.log(logCount)
-	slider.max = logCount
-}
-
-function addRouteToMap(data, map) {
-
-	routeLine = map.addLayer({
-        "id": "route",
-        "type": "line",
-        "source": {
-        	"type": "geojson",
-        	"data": data
-        },
-        "layout": {
-            "line-join": "round",
-            "line-cap": "round",
-            //"line-offset": "10px"
-        },
-        "paint": {
-            "line-color": primaryColor,//"#02DBC1",//#D8597F",
-            "line-width": 2,
-            "line-dasharray": [2, 2],
-            //"line-gap-width": 10
-        }
-    });
-}
-
-function addCatMarker() {
-
-	var el = document.createElement('div');
-	el.className = 'cat-marker';
-	el.style.width = 100 + 'px';
-	el.style.height = 100 + 'px';
-
-	let coordinates = getCatMarkerCoordinates(0)
-
-	catMarker = new mapboxgl.Marker(el, {offset: [-50, -110]})
-		.setLngLat(coordinates)
-	    .addTo(map);
-}
-
-function updateCatMarker() {
-	
-	document.getElementById('time-slider').addEventListener('input', function(e) {
-	  
-		// get the current hour as an integer
-		let logValue = parseInt(e.target.value)
-		let coordinates = getCatMarkerCoordinates(logValue)
-
-		//console.log(coordinates)
-		catMarker.setLngLat(coordinates)
-	});
-}
-
-function getCatMarkerCoordinates(index) {
-
-	if (index >= routeDataSource.length) {
-		console.log("No coordinates for marker available.")
-		return
-	}
-
-	let geoData = routeDataSource.features[0].geometry.coordinates[index]
-	let coordinates = [geoData[0], geoData[1]]
-
-	//console.log(coordinates)
-
-	return coordinates
-}
-
-function addHomeIcon() {
-
-    var el = document.createElement('div');
-    el.className = 'home-marker';
-    el.style.width = 50 + 'px';
-    el.style.height = 60 + 'px';
-    el.style.backgroundImage = 'url(src/svg/raw/home-pin.svg)';
-
-    new mapboxgl.Marker(el, {offset: [-25, -60]})
-    	.setLngLat(homeCoordinates)
-        .addTo(map);
-}
-
-/*
-function addHomeIcon(data) {
-
-	let geoData = data.features[0].geometry.coordinates[0]
-	let coordinates = [geoData[0], geoData[1]]
-
-	console.log(coordinates)
-
-    var el = document.createElement('div');
-    el.className = 'home-marker';
-    el.style.width = 50 + 'px';
-    el.style.height = 60 + 'px';
-    el.style.backgroundImage = 'url(src/svg/raw/home-pin.svg)';
-
-    new mapboxgl.Marker(el, {offset: [-30, -90]})
-    	.setLngLat(coordinates)
-        .addTo(map);
-}
-*/
-
-function addOverlay() {
-	
-	map.on('load', function () {
-
-	    map.addSource("area", createGeoJSONCircle(homeCoordinates, 1.14))
-
-		map.addLayer({
-		    "id": "areaCircle",
-		    "type": "fill",
-		    "source": "area",
-		    "layout": {},
-		    "paint": {
-		        "fill-color": primaryColor,
-		        "fill-opacity": 0.08,
-		        //"fill-antialias": true,
-		        //"fill-outline-color": "red",
-		        //"line-width": 2
-		    }
-		})
-
-		$.getJSON("logs/sampleLog.geojson", function(data) { 
-			
-			routeDataSource = data
-			
-			addRouteToMap(data, map)
-			getLogCount(data)
-
-			addHomeIcon()
-			addCatMarker()
-
-			//getCatMarkerCoordinates(2)
-			updateCatMarker()
-			//measureDistance(data)
-			//turf.lineDistance(lineString)
-		});
-
-		//addHomeIcon()
-		//addCatMarker()
-	})
 }

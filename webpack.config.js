@@ -29,6 +29,13 @@ module.exports = {
 		// don't transform node_modules folder (which don't need to be compiled)
 			exclude: /node_modules/
 		}
+		],
+		plugins: [
+			new webpack.DefinePlugin({
+				'process.env': {
+					NODE_ENV: '"production"'
+				}
+			})
 		]
 	},
 	vue: {

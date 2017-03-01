@@ -8852,7 +8852,7 @@
 	  /* script */
 	  __webpack_require__(5),
 	  /* template */
-	  __webpack_require__(16),
+	  __webpack_require__(21),
 	  /* scopeId */
 	  null,
 	  /* cssModules */
@@ -9050,19 +9050,25 @@
 	    staticClass: "catpicture"
 	  }, [_c('img', {
 	    attrs: {
-	      "src": "src/images/mio_avatar.jpg"
+	      "data-selected-cat-image": ""
 	    }
 	  })]), _vm._v(" "), _c('nav', {
 	    staticClass: "selection-dropdown"
 	  }, [_c('ul', [_c('li', {
-	    staticClass: "selected-cat"
+	    attrs: {
+	      "data-cat-identifier": "mio"
+	    }
 	  }, [_c('figure', {
 	    staticClass: "catpicture"
 	  }, [_c('img', {
 	    attrs: {
 	      "src": "src/images/mio_avatar.jpg"
 	    }
-	  })]), _vm._v(" "), _c('figcaption', [_vm._v("Mio")])]), _vm._v(" "), _c('li', [_c('figure', {
+	  })]), _vm._v(" "), _c('figcaption', [_vm._v("Mio")])]), _vm._v(" "), _c('li', {
+	    attrs: {
+	      "data-cat-identifier": "coco"
+	    }
+	  }, [_c('figure', {
 	    staticClass: "catpicture"
 	  }, [_c('img', {
 	    attrs: {
@@ -9071,13 +9077,11 @@
 	  })]), _vm._v(" "), _c('figcaption', [_vm._v("Coco")])])])])])])])
 	},function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
 	  return _c('section', {
-	    staticClass: "filter-section"
-	  }, [_c('a', {
-	    staticClass: "filter-button",
+	    staticClass: "weather-section",
 	    attrs: {
-	      "href": "#"
+	      "id": "weather"
 	    }
-	  }, [_vm._v("Filter")])])
+	  }, [_c('span', [_vm._v("Weather")])])
 	}]}
 	module.exports.render._withStripped = true
 	if (false) {
@@ -9149,19 +9153,33 @@
 	  }, [_c('nav', {
 	    staticClass: "bottombar"
 	  }, [_c('span', {
-	    staticClass: "time"
-	  }, [_vm._v("11:36")]), _vm._v(" "), _c('input', {
+	    staticClass: "time",
+	    attrs: {
+	      "id": "startTime"
+	    }
+	  }, [_vm._v("00:00")]), _vm._v(" "), _c('section', {
+	    staticClass: "input-container"
+	  }, [_c('div', {
+	    staticClass: "currentTimeIndicator",
+	    attrs: {
+	      "id": "time-indicator"
+	    }
+	  }, [_vm._v("00:00")]), _vm._v(" "), _c('input', {
 	    staticClass: "timerange-slider",
 	    attrs: {
 	      "id": "time-slider",
 	      "type": "range",
 	      "min": "0",
+	      "max": "1",
 	      "step": "1",
 	      "value": "0"
 	    }
-	  }), _vm._v(" "), _c('span', {
-	    staticClass: "time"
-	  }, [_vm._v("13:14")])])])
+	  })]), _vm._v(" "), _c('span', {
+	    staticClass: "time",
+	    attrs: {
+	      "id": "endTime"
+	    }
+	  }, [_vm._v("00:00")])])])
 	}]}
 	module.exports.render._withStripped = true
 	if (false) {
@@ -9179,7 +9197,7 @@
 	  /* script */
 	  __webpack_require__(13),
 	  /* template */
-	  __webpack_require__(15),
+	  __webpack_require__(20),
 	  /* scopeId */
 	  null,
 	  /* cssModules */
@@ -9221,248 +9239,195 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var darkGray = "#373D40",
-	    primaryColor = "#D8597F",
-	    secondaryColor = "#7D64FF";
+	// var datasources = require("./datasources.js");
+	var mapHelper = __webpack_require__(15);
+	var userInteractions = __webpack_require__(17);
 
-	var logCount = 0;
+	document.addEventListener("DOMContentLoaded", function (event) {
 
-	var map = null;
-	var routeLine = null;
-	var homeCoordinates = [13.651298, 52.376738];
+		var initialCat = null;
+		var selectedCatString = null;
 
-	var catMarker = null;
+		// cats
+		var coco = __webpack_require__(18);
+		var mio = __webpack_require__(19);
 
-	var routeDataSource = null;
-
-	var slider = null;
-
-	var createGeoJSONCircle = function createGeoJSONCircle(center, radiusInKm, points) {
-
-		if (!points) points = 64;
-
-		var coords = {
-			latitude: center[1],
-			longitude: center[0]
+		// ## datasets
+		var cocoDataSet = {
+			zoom: 18,
+			trackingData: "logs/cocoLog.geojson",
+			date: "13.02.2017",
+			startTime: "22:17",
+			endTime: "07:27",
+			speed: 0.3,
+			radius: 0.10125,
+			distance: 3.2,
+			temperature: -1,
+			weatherCondition: "Cloudy"
 		};
 
-		var km = radiusInKm;
+		var mioDataSet = {
+			zoom: 19,
+			trackingData: "logs/mioLog_2.geojson",
+			date: "21.02.2017",
+			startTime: "22:52",
+			endTime: "06:12",
+			speed: 0.1,
+			radius: 0.0475,
+			distance: 1.3,
+			temperature: 2,
+			weatherCondition: "Cloudy"
+		};
 
-		var ret = [];
-		var distanceX = km / (111.320 * Math.cos(coords.latitude * Math.PI / 180));
-		var distanceY = km / 110.574;
+		coco.data = cocoDataSet;
+		mio.data = mioDataSet;
 
-		var theta, x, y;
-		for (var i = 0; i < points; i++) {
-			theta = i / points * (2 * Math.PI);
-			x = distanceX * Math.cos(theta);
-			y = distanceY * Math.sin(theta);
+		console.log(mio.data.trackingData);
 
-			ret.push([coords.longitude + x, coords.latitude + y]);
+		// ## general stuff related to the map and visual appearance
+		var homeCoordinates = [13.651155, 52.37671];
+
+		var slider = document.getElementById('time-slider'),
+		    map = null,
+		    mapSources = null,
+		    mapLayers = null,
+		    catMarker = null;
+
+		userInteractions.handleOverlayToggling();
+
+		// ## setup map
+		mapboxgl.accessToken = 'pk.eyJ1IjoiYXJ0aHVyc2NoaWxsZXIiLCJhIjoiY2l4cm1iamZxMDAzeDJxcmJhdG5sNGRkbCJ9.o1r2qoVtyIgFco7r5ErM2A';
+
+		map = new mapboxgl.Map({
+			container: 'map',
+			style: 'mapbox://styles/arthurschiller/ciyu45zq6004v2rqmorg8phtj', //'mapbox://styles/mapbox/light-v9',
+			center: homeCoordinates,
+			minZoom: 13.5,
+			zoom: 13.5,
+			pitch: 50
+		});
+
+		configure(map, homeCoordinates);
+
+		setInitialCat(coco, function () {
+			visualizeDataOn(map, slider, initialCat);
+			setSliderIndicatorPosition();
+		});
+
+		(0, _jquery2.default)("#initial-overlay .cat-picker li").click(function () {
+
+			(0, _jquery2.default)("body").removeClass("initial-overlay-open");
+		});
+
+		map.on('load', function () {
+
+			console.log("Map finished loading.");
+			(0, _jquery2.default)("body").addClass("finished-loading");
+
+			// ## user interaction
+			(0, _jquery2.default)("[data-cat-identifier]").click(function () {
+
+				var catId = this.dataset.catIdentifier;
+				console.log(catId);
+
+				if (catId == selectedCatString) {
+					console.log("already selected");
+					return;
+				}
+
+				selectedCatString = catId;
+
+				(0, _jquery2.default)("[data-cat-identifier]").each(function () {
+					(0, _jquery2.default)(this).removeClass("selected-cat");
+				});
+
+				(0, _jquery2.default)(this).addClass("selected-cat");
+
+				switch (catId) {
+
+					case "mio":
+						console.log("switch to mio");
+						mapHelper.switchData(map, slider, mio);
+						userInteractions.switchUIFor(mio);
+						break;
+
+					case "coco":
+						console.log("switch to coco");
+						mapHelper.switchData(map, slider, coco);
+						userInteractions.switchUIFor(coco);
+						break;
+				}
+
+				(0, _jquery2.default)('#time-slider')[0].value = 0;
+				setSliderIndicatorPosition();
+			});
+
+			// setTimeout(function(){
+
+			// 	mapHelper.switchData(map, slider, mio)
+
+			// }, 2000);
+		});
+
+		function setInitialCat(cat, completion) {
+
+			initialCat = cat;
+			selectedCatString = initialCat.name.toLowerCase();
+			userInteractions.switchUIFor(cat);
+			completion();
 		}
-		ret.push(ret[0]);
 
-		return {
-			"type": "geojson",
-			"data": {
-				"type": "FeatureCollection",
-				"features": [{
-					"type": "Feature",
-					"geometry": {
-						"type": "Polygon",
-						"coordinates": [ret]
-					}
-				}]
-			}
-		};
+		var someValue = 1.12356;
+		var otherValue = 1.123378;
+
+		console.log(String(someValue).substring(0, 5));
+	});
+
+	// ## functions
+	function configure(map, homeCoordinates) {
+
+		map.on('load', function () {
+
+			mapHelper.extrudeBuildings(map);
+		});
+	}
+
+	function visualizeDataOn(map, slider, cat) {
+
+		map.on('load', function () {
+
+			mapHelper.displayInitialData(map, slider, cat);
+		});
+	}
+
+	function setSliderIndicatorPosition() {
+
+		var slider = (0, _jquery2.default)('#time-slider')[0],
+		    timeIndicator = (0, _jquery2.default)("#time-indicator"),
+		    offset = 17,
+		    trackWidth = (0, _jquery2.default)(slider).width() - offset * 2,
+		    value = slider.value,
+		    maxValue = slider.max;
+
+		var percentage = value / maxValue;
+		var computedPosition = -offset + trackWidth * percentage;
+
+		console.log(maxValue);
+
+		(0, _jquery2.default)(timeIndicator).css("left", +computedPosition + "px");
+	}
+
+	window.onresize = function (event) {
+		setSliderIndicatorPosition();
 	};
 
 	exports.default = {
+
 		name: 'Map',
 		data: function data() {
 			return {};
 		}
 	};
-
-
-	document.addEventListener("DOMContentLoaded", function (event) {
-
-		(0, _jquery2.default)("#info-overlay_toggle").click(function () {
-			(0, _jquery2.default)(".info-overlay").toggleClass("info-overlay--visible");
-		});
-
-		slider = document.getElementById('time-slider');
-
-		mapboxgl.accessToken = 'pk.eyJ1IjoiYXJ0aHVyc2NoaWxsZXIiLCJhIjoiY2l4cm1iamZxMDAzeDJxcmJhdG5sNGRkbCJ9.o1r2qoVtyIgFco7r5ErM2A';
-		// This adds the map to your page
-		map = new mapboxgl.Map({
-			// container id specified in the HTML
-			container: 'map',
-			// style URL
-			style: 'mapbox://styles/arthurschiller/ciyu45zq6004v2rqmorg8phtj', //'mapbox://styles/mapbox/light-v9',
-			// // initial position in [long, lat] format
-			center: homeCoordinates,
-			// // initial zoom
-			minZoom: 13.5,
-			zoom: 14,
-			pitch: 50
-		});
-
-		addOverlay();
-	});
-
-	function measureDistance(data) {
-
-		var linestring = {
-			"type": "Feature",
-			"geometry": {
-				"type": "LineString",
-				"coordinates": []
-			}
-		};
-
-		var coordinates = data.features[0].geometry.coordinates;
-		//console.log(coordinates)
-	}
-
-	function getLogCount(data) {
-
-		var times = data.features[0].properties.coordTimes;
-
-		logCount = times.length;
-		//console.log(logCount)
-		slider.max = logCount;
-	}
-
-	function addRouteToMap(data, map) {
-
-		routeLine = map.addLayer({
-			"id": "route",
-			"type": "line",
-			"source": {
-				"type": "geojson",
-				"data": data
-			},
-			"layout": {
-				"line-join": "round",
-				"line-cap": "round"
-			},
-			"paint": {
-				"line-color": primaryColor, //"#02DBC1",//#D8597F",
-				"line-width": 2,
-				"line-dasharray": [2, 2]
-			}
-		});
-	}
-
-	function addCatMarker() {
-
-		var el = document.createElement('div');
-		el.className = 'cat-marker';
-		el.style.width = 100 + 'px';
-		el.style.height = 100 + 'px';
-
-		var coordinates = getCatMarkerCoordinates(0);
-
-		catMarker = new mapboxgl.Marker(el, { offset: [-50, -110] }).setLngLat(coordinates).addTo(map);
-	}
-
-	function updateCatMarker() {
-
-		document.getElementById('time-slider').addEventListener('input', function (e) {
-
-			// get the current hour as an integer
-			var logValue = parseInt(e.target.value);
-			var coordinates = getCatMarkerCoordinates(logValue);
-
-			//console.log(coordinates)
-			catMarker.setLngLat(coordinates);
-		});
-	}
-
-	function getCatMarkerCoordinates(index) {
-
-		if (index >= routeDataSource.length) {
-			console.log("No coordinates for marker available.");
-			return;
-		}
-
-		var geoData = routeDataSource.features[0].geometry.coordinates[index];
-		var coordinates = [geoData[0], geoData[1]];
-
-		//console.log(coordinates)
-
-		return coordinates;
-	}
-
-	function addHomeIcon() {
-
-		var el = document.createElement('div');
-		el.className = 'home-marker';
-		el.style.width = 50 + 'px';
-		el.style.height = 60 + 'px';
-		el.style.backgroundImage = 'url(src/svg/raw/home-pin.svg)';
-
-		new mapboxgl.Marker(el, { offset: [-25, -60] }).setLngLat(homeCoordinates).addTo(map);
-	}
-
-	/*
-	function addHomeIcon(data) {
-
-		let geoData = data.features[0].geometry.coordinates[0]
-		let coordinates = [geoData[0], geoData[1]]
-
-		console.log(coordinates)
-
-	    var el = document.createElement('div');
-	    el.className = 'home-marker';
-	    el.style.width = 50 + 'px';
-	    el.style.height = 60 + 'px';
-	    el.style.backgroundImage = 'url(src/svg/raw/home-pin.svg)';
-
-	    new mapboxgl.Marker(el, {offset: [-30, -90]})
-	    	.setLngLat(coordinates)
-	        .addTo(map);
-	}
-	*/
-
-	function addOverlay() {
-
-		map.on('load', function () {
-
-			map.addSource("area", createGeoJSONCircle(homeCoordinates, 1.14));
-
-			map.addLayer({
-				"id": "areaCircle",
-				"type": "fill",
-				"source": "area",
-				"layout": {},
-				"paint": {
-					"fill-color": primaryColor,
-					"fill-opacity": 0.08
-				}
-			});
-
-			_jquery2.default.getJSON("logs/sampleLog.geojson", function (data) {
-
-				routeDataSource = data;
-
-				addRouteToMap(data, map);
-				getLogCount(data);
-
-				addHomeIcon();
-				addCatMarker();
-
-				//getCatMarkerCoordinates(2)
-				updateCatMarker();
-				//measureDistance(data)
-				//turf.lineDistance(lineString)
-			});
-
-			//addHomeIcon()
-			//addCatMarker()
-		});
-	}
 
 /***/ },
 /* 14 */
@@ -19694,6 +19659,428 @@
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
+
+	var _jquery = __webpack_require__(14);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var dataSetHelper = __webpack_require__(16);
+
+	var darkGray = "#373D40",
+	    primaryColor = "#D8597F",
+	    secondaryColor = "#7D64FF";
+
+	var homeMarker = null;
+	var catMarker = null;
+
+	var routeSourceID = "routeSource";
+	var routeLayerID = "routeLayer";
+
+	var areaSourceID = "areaSource";
+	var areaLayerID = "areaLayer";
+
+	var currentDataSet = null;
+
+	// ## create geoJSON Circle
+	var createGeoJSONCircle = function createGeoJSONCircle(center, radiusInKm, points) {
+
+		if (!points) points = 64;
+
+		var coords = {
+			latitude: center[1],
+			longitude: center[0]
+		};
+
+		var km = radiusInKm;
+
+		var ret = [];
+		var distanceX = km / (111.320 * Math.cos(coords.latitude * Math.PI / 180));
+		var distanceY = km / 110.574;
+
+		var theta, x, y;
+
+		for (var i = 0; i < points; i++) {
+			theta = i / points * (2 * Math.PI);
+			x = distanceX * Math.cos(theta);
+			y = distanceY * Math.sin(theta);
+
+			ret.push([coords.longitude + x, coords.latitude + y]);
+		}
+
+		ret.push(ret[0]);
+
+		return {
+			"type": "geojson",
+			"data": {
+				"type": "FeatureCollection",
+				"features": [{
+					"type": "Feature",
+					"geometry": {
+						"type": "Polygon",
+						"coordinates": [ret]
+					}
+				}]
+			}
+		};
+	};
+
+	// ## get total count of logs from dataset
+	function getLogCount(slider, data) {
+
+		var times = data.features[0].properties.coordTimes;
+
+		logCount = times.length;
+		//console.log(logCount)
+		slider.max = logCount;
+	}
+
+	// ## draw stuff on map
+	function drawRouteOn(map, data) {
+
+		map.addSource(routeSourceID, {
+			"type": "geojson",
+			"data": data
+		});
+
+		map.addLayer({
+			"id": routeLayerID,
+			"type": "line",
+			"source": routeSourceID,
+			"layout": {
+				"line-join": "round",
+				"line-cap": "round"
+			},
+			"paint": {
+				"line-color": primaryColor, //"#02DBC1",//#D8597F",
+				"line-width": 2,
+				"line-dasharray": [2, 2]
+			}
+		});
+	}
+
+	function drawRadiusCircle(map, center, radius) {
+
+		map.addSource(areaSourceID, createGeoJSONCircle(center, radius));
+
+		map.addLayer({
+			"id": areaLayerID,
+			"type": "fill",
+			"source": areaSourceID,
+			"layout": {},
+			"paint": {
+				"fill-color": primaryColor,
+				"fill-opacity": 0.08
+			}
+		});
+	}
+
+	function addHomeIcon(map, coordinates) {
+
+		var el = document.createElement('div');
+		el.className = 'home-marker';
+		el.style.width = 50 + 'px';
+		el.style.height = 60 + 'px';
+		el.style.backgroundImage = 'url(src/svg/raw/home-pin.svg)';
+
+		homeMarker = new mapboxgl.Marker(el, { offset: [-25, -60] }).setLngLat(coordinates).addTo(map);
+	}
+
+	function addCatMarkerTo(map, data) {
+
+		var el = document.createElement('div');
+		el.className = 'cat-marker';
+		el.style.width = 100 + 'px';
+		el.style.height = 100 + 'px';
+
+		var coordinates = dataSetHelper.getCatMarkerCoordinatesFor(0, data)[0];
+
+		catMarker = new mapboxgl.Marker(el, { offset: [-50, -110] }).setLngLat(coordinates).addTo(map);
+	}
+
+	function setSliderIndicatorPosition(slider, time) {
+
+		var timeIndicator = (0, _jquery2.default)("#time-indicator"),
+		    offset = 17,
+		    trackWidth = (0, _jquery2.default)(slider).width() - offset * 2,
+		    value = slider.value,
+		    maxValue = slider.max;
+
+		var percentage = value / maxValue;
+		var computedPosition = -offset + trackWidth * percentage;
+
+		console.log(computedPosition);
+
+		(0, _jquery2.default)(timeIndicator).text(time);
+		(0, _jquery2.default)(timeIndicator).css("left", +computedPosition + "px");
+	}
+
+	function updateCatMarker(marker, slider) {
+
+		slider.addEventListener('input', function (e) {
+
+			var logValue = parseInt(e.target.value);
+			var dataSet = dataSetHelper.getCatMarkerCoordinatesFor(logValue, currentDataSet);
+
+			console.log(dataSet);
+
+			var coordinates = dataSet[0],
+			    time = dataSet[1];
+
+			console.log(time);
+
+			setSliderIndicatorPosition(slider, time);
+
+			// var oldIndex = 0
+
+			// if (!logValue == 0) {
+			// 	oldIndex = logValue - 1
+			// }
+
+			// console.log(oldIndex)
+			// let oldCoordinates = dataSetHelper.getCatMarkerCoordinatesFor(oldIndex, currentDataSet)
+
+			// map.flyTo({
+			// 	center: coordinates,
+			// 	zoom: cat.zoom,
+			// })
+
+			// console.log(Stringcoordinates)
+			// console.log(oldCoordinates)
+
+			marker.setLngLat(coordinates);
+		});
+	}
+
+	// ## expose helper methods
+	module.exports = {
+
+		extrudeBuildings: function extrudeBuildings(map) {
+
+			map.addLayer({
+				'id': '3d-buildings',
+				'source': 'composite',
+				'source-layer': 'building',
+				'filter': ['==', 'extrude', 'true'],
+				'type': 'fill-extrusion',
+				'minzoom': 16,
+				'paint': {
+					'fill-extrusion-color': '#A79584',
+					'fill-extrusion-height': {
+						'type': 'identity',
+						'property': 'height'
+					},
+					'fill-extrusion-base': {
+						'type': 'identity',
+						'property': 'min_height'
+					},
+					'fill-extrusion-opacity': .25
+				}
+			});
+		},
+
+		displayInitialData: function displayInitialData(map, slider, cat) {
+
+			map.flyTo({
+				zoom: cat.data.zoom,
+				center: cat.homeCoordinates
+			});
+
+			console.log("Displaying data for cat " + cat.name);
+
+			_jquery2.default.getJSON(cat.data.trackingData, function (data) {
+
+				currentDataSet = data;
+
+				drawRouteOn(map, data);
+
+				slider.max = dataSetHelper.getLogCountFor(data);
+
+				addCatMarkerTo(map, data);
+				updateCatMarker(catMarker, slider);
+			});
+
+			addHomeIcon(map, cat.homeCoordinates);
+			drawRadiusCircle(map, cat.homeCoordinates, cat.data.radius);
+		},
+
+		switchData: function switchData(map, slider, cat) {
+
+			map.flyTo({
+				zoom: cat.data.zoom,
+				center: cat.homeCoordinates
+			});
+
+			console.log("Displaying data for cat " + cat.name);
+
+			_jquery2.default.getJSON(cat.data.trackingData, function (data) {
+
+				currentDataSet = data;
+				//console.log(data)
+
+				map.getSource(routeSourceID).setData(data);
+
+				slider.max = dataSetHelper.getLogCountFor(data);
+				slider.value = 0;
+
+				var coordinates = dataSetHelper.getCatMarkerCoordinatesFor(0, data)[0];
+				catMarker.setLngLat(coordinates);
+			});
+
+			homeMarker.setLngLat(cat.homeCoordinates);
+
+			map.removeLayer(areaLayerID);
+			map.removeSource(areaSourceID);
+			drawRadiusCircle(map, cat.homeCoordinates, cat.data.radius);
+		}
+	};
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	function getTimeAndDateFrom(string) {
+
+		var date = new Date(string);
+
+		var time = date.toLocaleTimeString('en-US', { hour12: false, hour: "numeric", minute: "numeric" }),
+		    day = date.getDate(),
+		    month = date.getMonth() + 1;
+
+		return time;
+	}
+
+	module.exports = {
+
+		getCatMarkerCoordinatesFor: function getCatMarkerCoordinatesFor(index, data) {
+
+			var coordinatesDataSet = data.features[0].geometry.coordinates;
+
+			if (index >= coordinatesDataSet.length) {
+
+				console.log("No coordinates for marker available.");
+				var _geoData = coordinatesDataSet[coordinatesDataSet.length - 1];
+				var _timeString = data.features[0].properties.coordTimes[coordinatesDataSet.length - 1];
+
+				return [[_geoData[0], _geoData[1]], getTimeAndDateFrom(_timeString)];
+			}
+
+			var geoData = coordinatesDataSet[index];
+			var coordinates = [geoData[0], geoData[1]];
+
+			var timeString = data.features[0].properties.coordTimes[index];
+
+			//console.log("Coordinates: " + coordinates)
+
+			return [coordinates, getTimeAndDateFrom(timeString)];
+		},
+
+		getLogCountFor: function getLogCountFor(data) {
+
+			var times = data.features[0].properties.coordTimes;
+
+			return times.length;
+		}
+	};
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _jquery = __webpack_require__(14);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	module.exports = {
+
+		handleOverlayToggling: function handleOverlayToggling() {
+
+			(0, _jquery2.default)("#info-overlay_toggle").click(function () {
+				(0, _jquery2.default)("#info-overlay").toggleClass("info-overlay--visible");
+			});
+		},
+
+		switchUIFor: function switchUIFor(cat) {
+
+			var infoContainer = (0, _jquery2.default)("#info-overlay"),
+			    image = (0, _jquery2.default)(infoContainer).find('[data-cat-image]'),
+			    nameLabel = (0, _jquery2.default)(infoContainer).find('[data-cat-name]'),
+			    ageLabel = (0, _jquery2.default)(infoContainer).find('[data-cat-age] span'),
+			    weightLabel = (0, _jquery2.default)(infoContainer).find('[data-cat-weight] span'),
+			    foodLabel = (0, _jquery2.default)(infoContainer).find('[data-cat-food] span'),
+			    dateLabel = (0, _jquery2.default)(infoContainer).find('[data-cat-date] span'),
+			    timeframeLabel = (0, _jquery2.default)(infoContainer).find('[data-cat-timeframe] span'),
+			    distanceLabel = (0, _jquery2.default)(infoContainer).find('[data-cat-distance] span'),
+			    speedLabel = (0, _jquery2.default)(infoContainer).find('[data-cat-speed] span'),
+			    radiusLabel = (0, _jquery2.default)(infoContainer).find('[data-cat-radius] span');
+
+			image.attr("src", cat.image);
+			nameLabel.text(cat.name);
+			ageLabel.text(cat.age);
+			weightLabel.text(cat.weight + " kg");
+			foodLabel.text(cat.food);
+			dateLabel.text(cat.data.date);
+			timeframeLabel.text(cat.data.startTime + " – " + cat.data.endTime);
+			distanceLabel.text(cat.data.distance + "km");
+			speedLabel.text(cat.data.speed + " km/h");
+			radiusLabel.text(cat.data.radius + " km");
+
+			var selectedCatImage = (0, _jquery2.default)("[data-selected-cat-image]");
+			selectedCatImage.attr("src", cat.image);
+
+			(0, _jquery2.default)("[data-cat-identifier=" + cat.name.toLowerCase() + "]").addClass("selected-cat");
+
+			(0, _jquery2.default)("#startTime").text(cat.data.startTime);
+			(0, _jquery2.default)("#endTime").text(cat.data.endTime);
+
+			(0, _jquery2.default)("#time-indicator").text(cat.data.startTime);
+
+			(0, _jquery2.default)("#weather span").text(cat.data.temperature + "°C, " + cat.data.weatherCondition);
+		}
+	};
+
+/***/ },
+/* 18 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	module.exports = {
+		image: "src/images/coco_avatar.jpg",
+		name: "Coco",
+		age: "1 year and 9 months",
+		weight: "3.3",
+		food: "Royal Canin Fit 32",
+		homeCoordinates: [13.651155, 52.37671]
+	};
+
+/***/ },
+/* 19 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	module.exports = {
+		image: "src/images/mio_avatar.jpg",
+		name: "Mio",
+		age: "9 months",
+		weight: "4.2",
+		food: "Royal Canin Fit 32",
+		homeCoordinates: [13.651155, 52.37671]
+	};
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
 	module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
 	  return _vm._m(0)
 	},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -19708,14 +20095,54 @@
 	      "id": "info-overlay_toggle"
 	    }
 	  }, [_vm._v("Toggle Meta Data")]), _vm._v(" "), _c('div', {
-	    staticClass: "info-overlay"
+	    staticClass: "info-overlay",
+	    attrs: {
+	      "id": "info-overlay"
+	    }
 	  }, [_c('header', [_c('figure', {
 	    staticClass: "catpicture"
 	  }, [_c('img', {
 	    attrs: {
-	      "src": "src/images/mio_avatar.jpg"
+	      "data-cat-image": "",
+	      "src": ""
 	    }
-	  })]), _vm._v(" "), _c('h2', [_vm._v("Mio")])]), _vm._v(" "), _c('h4', [_vm._v("Info")]), _vm._v(" "), _c('ul', [_c('li', [_vm._v("Age: "), _c('span', [_vm._v("9 month")])]), _vm._v(" "), _c('li', [_vm._v("Weight: "), _c('span', [_vm._v("4,2kg")])]), _vm._v(" "), _c('li', [_vm._v("Food: "), _c('span', [_vm._v("Royal Canin Fit 32")])])]), _vm._v(" "), _c('h4', [_vm._v("Activity")]), _vm._v(" "), _c('ul', [_c('li', [_vm._v("Date: "), _c('span', [_vm._v("22.01.2017")])]), _vm._v(" "), _c('li', [_vm._v("Timeframe: "), _c('span', [_vm._v("11:56 – 13:14")])]), _vm._v(" "), _c('li', [_vm._v("Distance: "), _c('span', [_vm._v("3,2 km")])]), _vm._v(" "), _c('li', [_vm._v("Avg. Speed: "), _c('span', [_vm._v("0.4 km/h")])]), _vm._v(" "), _c('li', [_vm._v("Area Radius: "), _c('span', [_vm._v("1,14 km")])])])])])
+	  })]), _vm._v(" "), _c('h2', {
+	    attrs: {
+	      "data-cat-name": ""
+	    }
+	  }, [_vm._v("Name")])]), _vm._v(" "), _c('h4', [_vm._v("Info")]), _vm._v(" "), _c('ul', [_c('li', {
+	    attrs: {
+	      "data-cat-age": ""
+	    }
+	  }, [_vm._v("Age: "), _c('span')]), _vm._v(" "), _c('li', {
+	    attrs: {
+	      "data-cat-weight": ""
+	    }
+	  }, [_vm._v("Weight: "), _c('span')]), _vm._v(" "), _c('li', {
+	    attrs: {
+	      "data-cat-food": ""
+	    }
+	  }, [_vm._v("Food: "), _c('span')])]), _vm._v(" "), _c('h4', [_vm._v("Activity")]), _vm._v(" "), _c('ul', [_c('li', {
+	    attrs: {
+	      "data-cat-date": ""
+	    }
+	  }, [_vm._v("Date: "), _c('span')]), _vm._v(" "), _c('li', {
+	    attrs: {
+	      "data-cat-timeframe": ""
+	    }
+	  }, [_vm._v("Timeframe: "), _c('span')]), _vm._v(" "), _c('li', {
+	    attrs: {
+	      "data-cat-distance": ""
+	    }
+	  }, [_vm._v("Distance: "), _c('span')]), _vm._v(" "), _c('li', {
+	    attrs: {
+	      "data-cat-speed": ""
+	    }
+	  }, [_vm._v("Avg. Speed: "), _c('span')]), _vm._v(" "), _c('li', {
+	    attrs: {
+	      "data-cat-radius": ""
+	    }
+	  }, [_vm._v("Area Radius: "), _c('span')])])])])
 	}]}
 	module.exports.render._withStripped = true
 	if (false) {
@@ -19726,7 +20153,7 @@
 	}
 
 /***/ },
-/* 16 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;

@@ -16,10 +16,57 @@
         <script src="src/js/vendor/modernizr-2.8.3.min.js"></script>
 
         <!-- <script src='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.js'></script> -->
-    <body>
+    <body class="initial-overlay-open">
         <!--[if lt IE 8]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
+
+        <aside id="initial-overlay" class="initial-overlay">
+
+            <header>
+                <svg class="intro-logo" xmlns="http://www.w3.org/2000/svg" width="239px" height="80px" viewBox="0 0 239 80"> 
+                    <use xlink:href="src/svg/svg_spritesheet.svg#logo" x="0" y="0" />
+                </svg>
+            </header>
+
+            <section class="project-intro">
+
+                <div class="spinner">
+                </div>
+
+                <div class="content">
+                    <h2>Welcome to CatMap!</h2>
+                    <p>The aim of this projects is to visualize the territory and movements of my cats.<br>
+                    To achieve this I equipped them with GPS loggers and exported the resulting data as a GeoJSON object.<br>
+                    Get started by picking a cat. Afterwards you can use the time slider to see the cats position at the selected time.<br>
+                    Feel free to <strong>drag, rotate and zoom</strong> around.</p>
+
+                    <p><span class="note">NOTE:</span> Currently there is only one dataset available for each cat. More will follow in future updates.</p>
+
+                    <ul class="cat-picker">
+                        <li data-cat-identifier="mio">
+                            <figure class="catpicture">
+                                <img src="src/images/mio_avatar.jpg">
+                            </figure>
+                            <figcaption>Mio</figcaption>
+                        </li>
+                        <li data-cat-identifier="coco">
+                            <figure class="catpicture">
+                                <img src="src/images/coco_avatar.jpg">
+                            </figure>
+                            <figcaption>Coco</figcaption>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <footer>
+                <p>This project is part of the course »Information Visualization WS 2016 at FH Potsdam«.
+                    <span class="supervisor">Supervised by Prof. Dr. Marian Dörk.</span>
+                    <span class="creator">Created by <a href="http://www.arthurschiller.de" target="_blank">Arthur Schiller</a>.</span>
+                </p>
+            </footer>
+        </aside>
 
         <main id="app" class="wrapper"></main>
 

@@ -197,20 +197,12 @@
 	}
 }
 
-.filter-section {
+.weather-section {
 	display: flex;
 	justify-content: flex-end;
-}
-
-.filter-button {
-	background: #FFF;
-	color: $primaryColor;
-	display: block;
-	margin: 0;
-	padding: rem(4) rem(8);
-	text-transform: uppercase;
-	letter-spacing: rem(1);
-	font-weight: 600;
-	font-size: rem(15);
-	border-radius: rem(4);
+	color: #FFF;
+	font-weight: bold;
+	font-size: rem(22);
+	position: relative;
+	top: rem(2);
 }

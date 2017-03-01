@@ -16,18 +16,18 @@
 			<div class="catpicker__container">
 				
 				<figure class="catpicture">
-					<img src="src/images/mio_avatar.jpg">
+					<img data-selected-cat-image>
 				</figure>
 
 				<nav class="selection-dropdown">
 			    	<ul>
-			    		<li class="selected-cat">
+			    		<li data-cat-identifier="mio">
 			    			<figure class="catpicture">
 								<img src="src/images/mio_avatar.jpg">
 			    			</figure>
 			    			<figcaption>Mio</figcaption>
 			    		</li>
-			    		<li>
+			    		<li data-cat-identifier="coco">
 			    			<figure class="catpicture">
 								<img src="src/images/coco_avatar.jpg">
 			    			</figure>
@@ -42,8 +42,8 @@
 
     </section>
 
-	<section class="filter-section">
-		<a class="filter-button" href="#">Filter</a>
+	<section id="weather" class="weather-section">
+		<span>Weather</span>
 	</section>
 
 </header>

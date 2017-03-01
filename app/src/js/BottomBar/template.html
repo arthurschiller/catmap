@@ -1,7 +1,13 @@
 <footer class="footer">
     <nav class="bottombar">
-    	<span class="time">11:36</span>
-    	<input id="time-slider" class="timerange-slider" type="range" min="0" step="1" value="0">
-    	<span class="time">13:14</span>
+
+    	<span id="startTime" class="time">00:00</span>
+
+    	<section class="input-container">
+    		<div id="time-indicator" class="currentTimeIndicator">00:00</div>
+    		<input id="time-slider" class="timerange-slider" type="range" min="0" max="1" step="1" value="0">
+    	</section>
+
+    	<span id="endTime" class="time">00:00</span>
     </nav>
 </footer>

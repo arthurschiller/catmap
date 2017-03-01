@@ -1,3 +1,5 @@
+$sliderSize: rem(34);
+
 .footer {
 
     $padding: rem(10);
@@ -15,8 +17,9 @@
 
 .bottombar {
     display: flex;
-    justify-content: center;
+    //justify-content: center;
     padding: rem(15) rem(20);
+    position: relative;
     
     background: rgba(#FFF, 0.85);
 
@@ -29,17 +32,55 @@
     .time {
         font-weight: bold;
     }
+
+    &:hover {
+
+        .currentTimeIndicator {
+            opacity: 1;
+            transform: scale3d(1, 1, 1) translateY(0px);
+            transition-delay: 0s;
+        }
+    }
+}
+
+.input-container {
+    position: relative;
+    flex: 1;
+    margin: 0 rem(20);
+    perspective: 600px;
+}
+
+.currentTimeIndicator {
+    background: $secondaryColor;
+    color: #FFF;
+    position: absolute;
+    bottom: 100%;
+    left: -$sliderSize / 2;
+    opacity: 0;
+    transform: scale3d(0.8, 0.8, 1) translateY(-20px);
+    transition: 0.2s transform 0.05s, 0.2s opacity 0.05s;
+    transition-timing-function: $default-easing;
+
+    padding: rem(8) rem(15);
+    margin-bottom: rem(18);
+    font-weight: bold;
+    border-radius: 4px;
+    box-shadow: 0 2px 1px 0 rgba($secondaryColor,0.15), 0 4px 15px 0 rgba($secondaryColor, 0.25);
+
+    &:before {
+        position: absolute;
+        left: 50%;
+        top: 100%;
+        @include triangle(down, rem(10), $secondaryColor);
+        margin-left: rem(-10);
+    }
 }
 
 $sliderTintColor: $secondaryColor;//#D1CCC5;
 
-input[type=range].timerange-slider {
-    margin: 0 rem(20);
-}
-
 input[type=range] {
     -webkit-appearance: none;
-    margin: 10px 0;
+    margin: 0;
     width: 100%;
     background: none;
 }
@@ -60,8 +101,8 @@ input[type=range]::-webkit-slider-runnable-track {
 input[type=range]::-webkit-slider-thumb {
     box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
     border: 0px solid #000000;
-    height: rem(34);
-    width: rem(34);
+    height: $sliderSize;
+    width: $sliderSize;
     border-radius: 50%;
     background: #FFF;
     cursor: pointer;
