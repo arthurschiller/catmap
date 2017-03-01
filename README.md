@@ -1,6 +1,6 @@
-# basement
-Super simple web-scaffold with gulp, sass and other fine stuff.
-The gulpfile is build around this sweet [Tutorial] by [Zell Liew]. So it's pretty easy to follow.
+# CatMap
+The aim of this projects is to visualize the territory and movements of my cats.
+To achieve this I equipped them with GPS loggers and exported the resulting data as a GeoJSON object.
 
 ## Installation
 First make sure you have nodeJS installed on your machine.
@@ -38,9 +38,3 @@ use:
 ```sh
 $ gulp build
 ```
-
-### Development
-Feedback, improvements, forks etc. are of course welcome! :)
-
-   [Tutorial]: <https://css-tricks.com/gulp-for-beginners/>
-   [Zell Liew]: <http://www.zell-weekeat.com>
